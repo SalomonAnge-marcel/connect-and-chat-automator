@@ -1,0 +1,24 @@
+{
+  "name": "LinkedIn Connector",
+  "version": "1.0",
+  "manifest_version": 3,
+  "description": "Automates LinkedIn connection requests and first messages from CSV files",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LinkedIn Connector"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
