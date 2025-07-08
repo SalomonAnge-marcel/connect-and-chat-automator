@@ -9,7 +9,7 @@ const STORAGE_KEYS = {
     DAILY_COUNT: 'daily_request_count'
 };
 
-const DAILY_LIMIT = 10; // Maximum connection requests per day
+const DAILY_LIMIT = 30; // Maximum connection requests per day
 let isRunning = false; // Track if automation is currently running
 let currentStatus = 'Ready'; // Current status message
 
