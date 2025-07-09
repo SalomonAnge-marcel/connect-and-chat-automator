@@ -13,6 +13,7 @@ interface CSVData {
   company?: string;
   position?: string;
   message?: string;
+  [key: string]: string | undefined; // Allow any additional custom columns
 }
 
 interface CSVUploadProps {
@@ -23,6 +24,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
   const [file, setFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<CSVData[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [customColumns, setCustomColumns] = useState<string[]>([]);
   const [validationStatus, setValidationStatus] = useState<{
     isValid: boolean;
     totalRows: number;
@@ -49,6 +51,11 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
   const parseCSV = (text: string): CSVData[] => {
     const lines = text.split('\n');
     const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    
+    // Identify custom columns (columns that aren't standard ones)
+    const standardColumns = ['profile_url', 'name', 'company', 'position', 'message'];
+    const customCols = headers.filter(h => !standardColumns.includes(h.toLowerCase()));
+    setCustomColumns(customCols);
     
     const data: CSVData[] = [];
     for (let i = 1; i < lines.length; i++) {
@@ -157,17 +164,17 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 font-space-grotesk">
           <Upload className="w-5 h-5" />
           CSV Upload
         </CardTitle>
-        <CardDescription>
-          Upload a CSV file with 'profile_url' and 'name' columns for LinkedIn contacts
+        <CardDescription className="font-poppins">
+          Upload a CSV file with 'profile_url' and 'name' columns for LinkedIn contacts. You can include up to 3 additional custom columns.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 font-poppins">
         <div className="space-y-2">
-          <Label htmlFor="csv-file">Choose CSV File</Label>
+          <Label htmlFor="csv-file" className="font-medium">Choose CSV File</Label>
           <Input
             id="csv-file"
             type="file"
@@ -192,6 +199,17 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
         >
           {isProcessing ? 'Processing...' : 'Process CSV'}
         </Button>
+
+        {customColumns.length > 0 && (
+          <div className="p-4 border rounded-lg bg-muted/50">
+            <div className="font-medium mb-2">Custom Columns Detected:</div>
+            <div className="flex flex-wrap gap-2">
+              {customColumns.map((col, index) => (
+                <Badge key={index} variant="outline">{col}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         {validationStatus && (
           <div className="p-4 border rounded-lg space-y-2">

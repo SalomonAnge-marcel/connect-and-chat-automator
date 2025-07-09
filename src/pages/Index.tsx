@@ -12,6 +12,7 @@ interface CSVData {
   company?: string;
   position?: string;
   message?: string;
+  [key: string]: string | undefined; // Allow any additional custom columns
 }
 
 interface CampaignStats {
@@ -77,8 +78,8 @@ const Index = () => {
               <Linkedin className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">LinkedIn Connector</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-3xl font-bold font-space-grotesk">LinkedIn Connector</h1>
+              <p className="text-muted-foreground font-poppins">
                 Automate your LinkedIn networking with intelligent connection management
               </p>
             </div>
