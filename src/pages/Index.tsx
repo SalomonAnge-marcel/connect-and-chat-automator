@@ -72,7 +72,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8" style={{ padding: '10rem' }}>
+      <div className="container mx-auto px-4 py-8" style={{ paddingLeft: '10rem', paddingRight: '10rem', paddingTop: '3.5rem', paddingBottom: '3.5rem' }}>
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-primary/10 rounded-lg">

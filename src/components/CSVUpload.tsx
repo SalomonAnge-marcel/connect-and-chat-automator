@@ -195,7 +195,6 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
         <Button 
           onClick={processFile} 
           disabled={!file || isProcessing}
-          className="w-full"
         >
           {isProcessing ? 'Processing...' : 'Process CSV'}
         </Button>
