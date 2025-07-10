@@ -3,8 +3,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CSVUpload } from '@/components/CSVUpload';
 import { CampaignDashboard } from '@/components/CampaignDashboard';
 import { InstructionsPanel } from '@/components/InstructionsPanel';
+import { LinkedInProfiles } from '@/components/LinkedInProfiles';
 import { useToast } from '@/hooks/use-toast';
-import { Linkedin, Upload, BarChart3, BookOpen } from 'lucide-react';
+import { Linkedin, Upload, BarChart3, BookOpen, Users } from 'lucide-react';
 
 interface CSVData {
   profile_url: string;
@@ -71,7 +72,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" style={{ padding: '10rem' }}>
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -87,7 +88,11 @@ const Index = () => {
         </div>
 
         <Tabs defaultValue="upload" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="profiles" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Profiles
+            </TabsTrigger>
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Upload CSV
@@ -101,6 +106,10 @@ const Index = () => {
               Instructions
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="profiles" className="space-y-6">
+            <LinkedInProfiles />
+          </TabsContent>
 
           <TabsContent value="upload" className="space-y-6">
             <CSVUpload onDataParsed={handleDataParsed} />
