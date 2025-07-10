@@ -1,8 +1,8 @@
 {
   "name": "LinkedIn Connector",
-  "version": "1.0",
+  "version": "2.0",
   "manifest_version": 3,
-  "description": "Automates LinkedIn connection requests and first messages from CSV files",
+  "description": "Safely automates LinkedIn outreach using your existing session with built-in safety measures",
   "action": {
     "default_popup": "popup.html",
     "default_title": "LinkedIn Connector"
@@ -10,7 +10,12 @@
   "permissions": [
     "activeTab",
     "storage",
-    "tabs"
+    "tabs",
+    "cookies",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.linkedin.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -18,7 +23,14 @@
   "content_scripts": [
     {
       "matches": ["https://www.linkedin.com/*"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html"],
+      "matches": ["https://www.linkedin.com/*"]
     }
   ]
 }

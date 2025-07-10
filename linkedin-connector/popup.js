@@ -4,19 +4,80 @@
 let csvData = []; // Store the CSV data after parsing
 let statusDiv; // Reference to the status display area
 
-// When the pop-up loads, set up event listeners
+// Enhanced popup initialization with session checking
 document.addEventListener('DOMContentLoaded', function() {
     statusDiv = document.getElementById('status');
     
-    // Set up file input listener
+    // Set up event listeners
     document.getElementById('csvFile').addEventListener('change', handleFileSelect);
-    
-    // Set up start button listener
     document.getElementById('startBtn').addEventListener('click', startAutomation);
+    document.getElementById('stopBtn').addEventListener('click', stopAutomation);
     
-    // Check current status from storage
+    // Initialize UI
+    initializePopup();
+    
+    // Check session status
+    checkLinkedInSession();
+    
+    // Check current automation status
     loadCurrentStatus();
+    
+    // Set up periodic session checking
+    setInterval(checkLinkedInSession, 30000); // Check every 30 seconds
+    setInterval(loadCurrentStatus, 5000); // Update status every 5 seconds
 });
+
+// Initialize popup UI with enhanced features
+function initializePopup() {
+    updateSessionIndicator(false, 'Checking session...');
+    
+    // Reset daily count display
+    updateDailyCount(0);
+    updateAutomationStatus('Ready');
+}
+
+// Check LinkedIn session status
+function checkLinkedInSession() {
+    chrome.runtime.sendMessage({action: 'checkSession'}, function(response) {
+        if (response && response.success) {
+            updateSessionIndicator(response.sessionValid, 
+                response.sessionValid ? 'LinkedIn session active' : 'Please log into LinkedIn');
+        } else {
+            updateSessionIndicator(false, 'Session check failed');
+        }
+    });
+}
+
+// Update session indicator in UI
+function updateSessionIndicator(isValid, message) {
+    const indicator = document.getElementById('sessionIndicator');
+    const dot = document.getElementById('sessionDot');
+    const text = document.getElementById('sessionText');
+    
+    if (isValid) {
+        indicator.className = 'session-indicator session-valid';
+        dot.className = 'status-dot green';
+    } else {
+        indicator.className = 'session-indicator session-invalid';
+        dot.className = 'status-dot red';
+    }
+    
+    text.textContent = message;
+    
+    // Enable/disable start button based on session
+    const startBtn = document.getElementById('startBtn');
+    startBtn.disabled = !isValid || csvData.length === 0;
+}
+
+// Update daily count display
+function updateDailyCount(count) {
+    document.getElementById('dailyCount').textContent = count;
+}
+
+// Update automation status display
+function updateAutomationStatus(status) {
+    document.getElementById('automationStatus').textContent = status;
+}
 
 // Handle when user selects a CSV file
 function handleFileSelect(event) {
@@ -98,28 +159,61 @@ function handleCSVParsed(results) {
     document.getElementById('startBtn').disabled = false;
 }
 
-// Start the automation process
+// Enhanced automation start with validation
 function startAutomation() {
     if (csvData.length === 0) {
         updateStatus('Error: Please upload a valid CSV file first', 'error');
         return;
     }
     
-    updateStatus('Starting automation...', 'info');
-    document.getElementById('startBtn').disabled = true;
-    
-    // Send the CSV data to the background script
-    chrome.runtime.sendMessage({
-        action: 'startAutomation',
-        csvData: csvData
-    }, function(response) {
-        if (response && response.success) {
-            updateStatus('Automation started successfully!', 'success');
-        } else {
-            updateStatus('Error: Could not start automation - ' + (response?.error || 'Unknown error'), 'error');
-            document.getElementById('startBtn').disabled = false;
+    // Double-check session before starting
+    chrome.runtime.sendMessage({action: 'checkSession'}, function(sessionResponse) {
+        if (!sessionResponse || !sessionResponse.sessionValid) {
+            updateStatus('Error: LinkedIn session not detected. Please log into LinkedIn first.', 'error');
+            return;
         }
+        
+        updateStatus('Starting safe automation...', 'info');
+        updateAutomationStatus('Starting');
+        
+        // Show stop button, hide start button
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'block';
+        
+        // Send the CSV data to the background script
+        chrome.runtime.sendMessage({
+            action: 'startAutomation',
+            csvData: csvData
+        }, function(response) {
+            if (response && response.success) {
+                updateStatus('✓ Automation started with safety measures enabled', 'success');
+                updateAutomationStatus('Running');
+            } else {
+                updateStatus('✗ Could not start automation: ' + (response?.error || 'Unknown error'), 'error');
+                resetButtonState();
+            }
+        });
     });
+}
+
+// Stop automation function
+function stopAutomation() {
+    chrome.runtime.sendMessage({action: 'stopAutomation'}, function(response) {
+        if (response && response.success) {
+            updateStatus('✓ Automation stopped by user', 'info');
+            updateAutomationStatus('Stopped');
+        } else {
+            updateStatus('Could not stop automation: ' + (response?.error || 'Not running'), 'error');
+        }
+        resetButtonState();
+    });
+}
+
+// Reset button state
+function resetButtonState() {
+    document.getElementById('startBtn').style.display = 'block';
+    document.getElementById('stopBtn').style.display = 'none';
+    updateAutomationStatus('Ready');
 }
 
 // Update the status display
@@ -131,23 +225,53 @@ function updateStatus(message, type = 'info') {
     statusDiv.scrollTop = statusDiv.scrollHeight; // Scroll to bottom
 }
 
-// Load current status from background script
+// Enhanced status loading with comprehensive updates
 function loadCurrentStatus() {
     chrome.runtime.sendMessage({action: 'getStatus'}, function(response) {
-        if (response && response.status) {
-            updateStatus(response.status, 'info');
+        if (response && response.success) {
+            if (response.status) {
+                updateStatus(response.status, 'info');
+            }
+            
+            if (typeof response.actionsToday === 'number') {
+                updateDailyCount(response.actionsToday);
+            }
+            
+            if (response.isRunning) {
+                updateAutomationStatus('Running');
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'block';
+            } else {
+                updateAutomationStatus('Ready');
+                resetButtonState();
+            }
         }
     });
 }
 
-// Listen for status updates from background script
+// Enhanced message listener for real-time updates
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'updateStatus') {
         updateStatus(request.message, request.type || 'info');
         
-        // Re-enable start button if automation is complete or stopped
-        if (request.message.includes('Stopped') || request.message.includes('Complete')) {
-            document.getElementById('startBtn').disabled = false;
+        // Update UI based on status
+        if (request.currentState) {
+            updateDailyCount(request.currentState.actionsToday || 0);
+            
+            if (request.currentState.isRunning) {
+                updateAutomationStatus('Running');
+            } else if (request.message.includes('completed') || 
+                      request.message.includes('stopped') || 
+                      request.message.includes('Stopped')) {
+                updateAutomationStatus('Complete');
+                resetButtonState();
+            }
         }
     }
+});
+
+// Add error handling for chrome extension context
+window.addEventListener('error', function(event) {
+    console.error('LinkedIn Connector Popup Error:', event.error);
+    updateStatus('Popup error: ' + event.error.message, 'error');
 });

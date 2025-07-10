@@ -24,6 +24,60 @@
             margin-bottom: 20px;
         }
         
+        .session-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .session-valid {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .session-invalid {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .status-dot.green {
+            background-color: #28a745;
+        }
+        
+        .status-dot.red {
+            background-color: #dc3545;
+        }
+        
+        .safety-info {
+            background-color: #e7f3ff;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 11px;
+            color: #0c5460;
+        }
+        
+        .limits-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
         .file-section {
             margin-bottom: 15px;
         }
@@ -94,16 +148,36 @@
 </head>
 <body>
     <div class="container">
-        <h1>LinkedIn Connector</h1>
+        <h1>LinkedIn Connector v2.0</h1>
+        
+        <div id="sessionIndicator" class="session-indicator">
+            <div class="status-dot" id="sessionDot"></div>
+            <span id="sessionText">Checking LinkedIn session...</span>
+        </div>
+        
+        <div class="safety-info">
+            <strong>Safety Features:</strong><br>
+            • Uses your existing LinkedIn session<br>
+            • 15 connections/day limit<br>
+            • 5 connections/hour limit<br>
+            • Random delays (5-12 seconds)<br>
+            • Automatic session validation
+        </div>
+        
+        <div class="limits-display">
+            <span>Today: <span id="dailyCount">0</span>/15</span>
+            <span>Status: <span id="automationStatus">Ready</span></span>
+        </div>
         
         <div class="file-section">
             <label for="csvFile">Choose CSV File:</label>
             <input type="file" id="csvFile" accept=".csv">
         </div>
         
-        <button id="startBtn">Start Automation</button>
+        <button id="startBtn">Start Safe Automation</button>
+        <button id="stopBtn" style="display: none; background-color: #dc3545;">Stop Automation</button>
         
-        <label for="status">Status:</label>
+        <label for="status">Activity Log:</label>
         <div id="status">Ready to start. Please upload a CSV file with 'profile_url' and 'name' columns.</div>
     </div>
     
