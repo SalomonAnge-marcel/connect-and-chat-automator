@@ -74,11 +74,11 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-space-grotesk">
                 <TrendingUp className="w-5 h-5" />
                 Campaign Dashboard
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="font-poppins mt-2">
                 Monitor your LinkedIn outreach campaign progress
               </CardDescription>
             </div>
@@ -87,7 +87,7 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="font-poppins">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {statCards.map((stat) => (
               <div key={stat.title} className="flex items-center space-x-3 p-3 rounded-lg border">
@@ -95,8 +95,8 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
                   <stat.icon className={`w-4 h-4 ${stat.color}`} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className="text-sm font-medium text-muted-foreground font-poppins">{stat.title}</p>
+                  <p className="text-2xl font-bold font-space-grotesk">{stat.value}</p>
                 </div>
               </div>
             ))}

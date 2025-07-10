@@ -48,15 +48,15 @@ https://linkedin.com/in/janedoe,Jane Doe,Marketing Inc,Marketing Manager,Hi Jane
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-space-grotesk">
             <BookOpen className="w-5 h-5" />
             How to Use LinkedIn Connector
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="font-poppins">
             Follow these steps to start your LinkedIn outreach campaign
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="font-poppins">
           <div className="space-y-4">
             {steps.map((step, index) => (
               <div key={index} className="flex items-start gap-4 p-4 border rounded-lg">
@@ -67,12 +67,12 @@ https://linkedin.com/in/janedoe,Jane Doe,Marketing Inc,Marketing Manager,Hi Jane
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium">{step.title}</h4>
+                    <h4 className="font-medium font-space-grotesk">{step.title}</h4>
                     <Badge variant={step.status === "required" ? "default" : "secondary"}>
                       {step.status}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                  <p className="text-sm text-muted-foreground font-poppins">{step.description}</p>
                 </div>
                 {index < steps.length - 1 && (
                   <ArrowRight className="w-4 h-4 text-muted-foreground mt-2" />
@@ -85,18 +85,18 @@ https://linkedin.com/in/janedoe,Jane Doe,Marketing Inc,Marketing Manager,Hi Jane
 
       <Card>
         <CardHeader>
-          <CardTitle>CSV Format Example</CardTitle>
-          <CardDescription>
+          <CardTitle className="font-space-grotesk">CSV Format Example</CardTitle>
+          <CardDescription className="font-poppins">
             Your CSV file should include these columns (profile_url and name are required)
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="font-poppins">
           <div className="bg-muted p-4 rounded-lg font-mono text-sm">
             <pre>{csvExample}</pre>
           </div>
           <div className="mt-4 space-y-2">
-            <h4 className="font-medium">Column Descriptions:</h4>
-            <ul className="text-sm text-muted-foreground space-y-1">
+            <h4 className="font-medium font-space-grotesk">Column Descriptions:</h4>
+            <ul className="text-sm text-muted-foreground space-y-1 font-poppins">
               <li><strong>profile_url:</strong> Full LinkedIn profile URL (required)</li>
               <li><strong>name:</strong> Contact's full name (required)</li>
               <li><strong>company:</strong> Company name (optional)</li>
@@ -118,12 +118,12 @@ https://linkedin.com/in/janedoe,Jane Doe,Marketing Inc,Marketing Manager,Hi Jane
 
       <Card>
         <CardHeader>
-          <CardTitle>Download Chrome Extension</CardTitle>
-          <CardDescription>
+          <CardTitle className="font-space-grotesk">Download Chrome Extension</CardTitle>
+          <CardDescription className="font-poppins">
             Get the LinkedIn Connector extension for automated functionality
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="font-poppins">
           <div className="flex items-center gap-4">
             <Button>
               <Download className="w-4 h-4 mr-2" />
