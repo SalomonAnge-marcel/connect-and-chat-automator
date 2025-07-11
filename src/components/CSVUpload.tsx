@@ -253,7 +253,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
                   <Select
                     value={
-                      Object.entries(columnMapping).find(([_, mapped]) => mapped === expectedCol)?.[0] || ""
+                      Object.entries(columnMapping).find(([_, mapped]) => mapped === expectedCol)?.[0] || "none"
                     }
                     onValueChange={(value) => {
                       // Remove any existing mapping to this expected column
@@ -264,7 +264,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
                         }
                       });
                       // Set new mapping
-                      if (value) {
+                      if (value && value !== "none") {
                         newMapping[value] = expectedCol;
                       }
                       setColumnMapping(newMapping);
@@ -274,7 +274,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
                       <SelectValue placeholder="Select CSV column" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No mapping</SelectItem>
+                      <SelectItem value="none">No mapping</SelectItem>
                       {csvHeaders.map((header) => (
                         <SelectItem key={header} value={header}>
                           {header}
