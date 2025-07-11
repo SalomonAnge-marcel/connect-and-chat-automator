@@ -239,10 +239,14 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
           <Card className="p-4 border-2 border-primary/20">
             <div className="font-medium mb-4 flex items-center gap-2">
               <ArrowRight className="w-4 h-4" />
-              Map CSV Columns to Required Fields
+              Map CSV Columns to Fields
             </div>
-            <div className="space-y-3">
-              {[...requiredColumns, ...optionalColumns].map((expectedCol) => (
+            
+            {/* Required and Optional Fields */}
+            <div className="mb-6">
+              <h4 className="font-medium text-sm mb-3 text-primary">Required & Optional Fields</h4>
+              <div className="space-y-3">
+                {[...requiredColumns, ...optionalColumns].map((expectedCol) => (
                 <div key={expectedCol} className="flex items-center gap-3">
                   <div className="w-32 text-sm font-medium">
                     {expectedCol}
@@ -282,8 +286,31 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Fields */}
+            <div>
+              <h4 className="font-medium text-sm mb-3 text-secondary">Custom Fields for Message Personalization</h4>
+              <div className="text-xs text-muted-foreground mb-3">
+                Any unmapped columns will be available as custom fields. Use {"{column_name}"} in your messages to personalize them.
+              </div>
+              <div className="space-y-2">
+                {csvHeaders
+                  .filter(header => !Object.values(columnMapping).includes(header))
+                  .map((header) => (
+                    <div key={header} className="flex items-center gap-2 p-2 bg-muted/50 rounded">
+                      <Badge variant="outline" className="text-xs">
+                        {header}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        → Available as {"{" + header + "}"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
             </div>
           </Card>
         )}

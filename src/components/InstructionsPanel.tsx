@@ -22,7 +22,7 @@ export const InstructionsPanel: React.FC = () => {
     },
     {
       title: "Prepare Your CSV",
-      description: "Create a CSV file with 'profile_url' and 'name' columns containing LinkedIn profiles",
+      description: "Create a CSV file with required columns and any custom fields for personalization",
       icon: BookOpen,
       status: "required"
     },
@@ -40,9 +40,9 @@ export const InstructionsPanel: React.FC = () => {
     }
   ];
 
-  const csvExample = `profile_url,name,company,position,message
-https://linkedin.com/in/johndoe,John Doe,Tech Corp,Software Engineer,Hi John! I'd love to connect
-https://linkedin.com/in/janedoe,Jane Doe,Marketing Inc,Marketing Manager,Hi Jane! Great to meet you`;
+  const csvExample = `profile_url,first_name,last_name,company,position,message,custom_field1
+https://linkedin.com/in/johndoe,John,Doe,Tech Corp,Software Engineer,Hi {first_name}! I'd love to connect,Mutual interest in AI
+https://linkedin.com/in/janedoe,Jane,Doe,Marketing Inc,Marketing Manager,Hi {first_name}! Great to meet you,Fellow marketing expert`;
 
   return (
     <div className="space-y-6">
@@ -87,7 +87,7 @@ https://linkedin.com/in/janedoe,Jane Doe,Marketing Inc,Marketing Manager,Hi Jane
         <CardHeader>
           <CardTitle className="font-space-grotesk">CSV Format Example</CardTitle>
           <CardDescription className="font-poppins">
-            Your CSV file should include these columns (profile_url and name are required)
+            Your CSV file should include these columns (profile_url, first_name, and last_name are required)
           </CardDescription>
         </CardHeader>
         <CardContent className="font-poppins">
@@ -98,10 +98,12 @@ https://linkedin.com/in/janedoe,Jane Doe,Marketing Inc,Marketing Manager,Hi Jane
             <h4 className="font-medium font-space-grotesk">Column Descriptions:</h4>
             <ul className="text-sm text-muted-foreground space-y-1 font-poppins">
               <li><strong>profile_url:</strong> Full LinkedIn profile URL (required)</li>
-              <li><strong>name:</strong> Contact's full name (required)</li>
+              <li><strong>first_name:</strong> Contact's first name (required)</li>
+              <li><strong>last_name:</strong> Contact's last name (required)</li>
               <li><strong>company:</strong> Company name (optional)</li>
               <li><strong>position:</strong> Job title (optional)</li>
               <li><strong>message:</strong> Personalized connection message (optional)</li>
+              <li><strong>custom fields:</strong> Any additional columns for message personalization (use {"{column_name}"} in messages)</li>
             </ul>
           </div>
         </CardContent>
