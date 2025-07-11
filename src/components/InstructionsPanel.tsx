@@ -13,6 +13,38 @@ import {
 } from 'lucide-react';
 
 export const InstructionsPanel: React.FC = () => {
+  const downloadExtensionFiles = async () => {
+    try {
+      // Create a zip-like structure with all extension files
+      const files = {
+        'manifest.json': await fetch('/linkedin-connector/manifest.json').then(r => r.text()),
+        'background.js': await fetch('/linkedin-connector/background.js').then(r => r.text()),
+        'content.js': await fetch('/linkedin-connector/content.js').then(r => r.text()),
+        'popup.html': await fetch('/linkedin-connector/popup.html').then(r => r.text()),
+        'popup.js': await fetch('/linkedin-connector/popup.js').then(r => r.text()),
+        'papaparse.min.js': await fetch('/linkedin-connector/papaparse.min.js').then(r => r.text()),
+      };
+
+      // Create a simple archive by combining all files with separators
+      let archiveContent = '';
+      for (const [filename, content] of Object.entries(files)) {
+        archiveContent += `// ===== ${filename} =====\n${content}\n\n`;
+      }
+
+      // Create download
+      const blob = new Blob([archiveContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'linkedin-connector-extension.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading extension files:', error);
+    }
+  };
   const steps = [
     {
       title: "Install Chrome Extension",
@@ -127,7 +159,7 @@ https://linkedin.com/in/janedoe,Jane,Doe,Marketing Inc,Marketing Manager,Hi {fir
         </CardHeader>
         <CardContent className="font-poppins">
           <div className="flex items-center gap-4">
-            <Button>
+            <Button onClick={downloadExtensionFiles}>
               <Download className="w-4 h-4 mr-2" />
               Download Extension Files
             </Button>

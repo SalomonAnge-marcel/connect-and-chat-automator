@@ -89,20 +89,20 @@ const Index = () => {
         </div>
 
         <Tabs defaultValue="upload" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="profiles" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-4 font-poppins">
+            <TabsTrigger value="profiles" className="flex items-center gap-2 font-poppins">
               <Users className="w-4 h-4" />
               Profiles
             </TabsTrigger>
-            <TabsTrigger value="upload" className="flex items-center gap-2">
+            <TabsTrigger value="upload" className="flex items-center gap-2 font-poppins">
               <Upload className="w-4 h-4" />
               Upload CSV
             </TabsTrigger>
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2 font-poppins">
               <BarChart3 className="w-4 h-4" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="instructions" className="flex items-center gap-2">
+            <TabsTrigger value="instructions" className="flex items-center gap-2 font-poppins">
               <BookOpen className="w-4 h-4" />
               Instructions
             </TabsTrigger>
