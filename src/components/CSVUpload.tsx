@@ -4,16 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Upload, FileText, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CSVData {
   profile_url: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   company?: string;
   position?: string;
   message?: string;
   [key: string]: string | undefined; // Allow any additional custom columns
+}
+
+interface ColumnMapping {
+  [csvColumn: string]: string | null; // Maps CSV column names to our expected column names
 }
 
 interface CSVUploadProps {
@@ -24,7 +30,9 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
   const [file, setFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<CSVData[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [customColumns, setCustomColumns] = useState<string[]>([]);
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [columnMapping, setColumnMapping] = useState<ColumnMapping>({});
+  const [showMapping, setShowMapping] = useState(false);
   const [validationStatus, setValidationStatus] = useState<{
     isValid: boolean;
     totalRows: number;
@@ -34,11 +42,35 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
 
   const { toast } = useToast();
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const requiredColumns = ['profile_url', 'first_name', 'last_name'];
+  const optionalColumns = ['company', 'position', 'message'];
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile && selectedFile.type === 'text/csv') {
       setFile(selectedFile);
       setValidationStatus(null);
+      setShowMapping(false);
+      
+      // Parse headers immediately to show mapping interface
+      const text = await selectedFile.text();
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      setCsvHeaders(headers);
+      
+      // Auto-map columns that match exactly
+      const autoMapping: ColumnMapping = {};
+      [...requiredColumns, ...optionalColumns].forEach(expectedCol => {
+        const matchedHeader = headers.find(h => 
+          h.toLowerCase() === expectedCol.toLowerCase() ||
+          h.toLowerCase().replace(/[_\s]/g, '') === expectedCol.toLowerCase().replace(/[_\s]/g, '')
+        );
+        if (matchedHeader) {
+          autoMapping[matchedHeader] = expectedCol;
+        }
+      });
+      setColumnMapping(autoMapping);
+      setShowMapping(true);
     } else {
       toast({
         title: "Invalid file type",
@@ -52,19 +84,23 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
     const lines = text.split('\n');
     const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
     
-    // Identify custom columns (columns that aren't standard ones)
-    const standardColumns = ['profile_url', 'name', 'company', 'position', 'message'];
-    const customCols = headers.filter(h => !standardColumns.includes(h.toLowerCase()));
-    setCustomColumns(customCols);
-    
     const data: CSVData[] = [];
     for (let i = 1; i < lines.length; i++) {
       if (lines[i].trim()) {
         const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
         const row: any = {};
+        
+        // Map CSV columns to our expected columns based on user mapping
         headers.forEach((header, index) => {
-          row[header] = values[index] || '';
+          const mappedColumn = columnMapping[header];
+          if (mappedColumn) {
+            row[mappedColumn] = values[index] || '';
+          } else {
+            // Keep unmapped columns as custom columns
+            row[header] = values[index] || '';
+          }
         });
+        
         data.push(row);
       }
     }
@@ -85,14 +121,16 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
       return { isValid: false, totalRows: 0, validRows: 0, errors };
     }
 
-    // Check for required columns
-    const firstRow = data[0];
-    if (!firstRow.hasOwnProperty('profile_url')) {
-      errors.push('Missing required column: profile_url');
-    }
-    if (!firstRow.hasOwnProperty('name')) {
-      errors.push('Missing required column: name');
-    }
+    // Check for required columns mapping
+    const mappedRequiredColumns = Object.values(columnMapping).filter(col => 
+      requiredColumns.includes(col || '')
+    );
+    
+    requiredColumns.forEach(col => {
+      if (!mappedRequiredColumns.includes(col)) {
+        errors.push(`Missing required column mapping: ${col}`);
+      }
+    });
 
     // Validate each row
     data.forEach((row, index) => {
@@ -107,8 +145,13 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
         isRowValid = false;
       }
 
-      if (!row.name || !row.name.trim()) {
-        errors.push(`Row ${rowNum}: Missing name`);
+      if (!row.first_name || !row.first_name.trim()) {
+        errors.push(`Row ${rowNum}: Missing first name`);
+        isRowValid = false;
+      }
+
+      if (!row.last_name || !row.last_name.trim()) {
+        errors.push(`Row ${rowNum}: Missing last name`);
         isRowValid = false;
       }
 
@@ -169,7 +212,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
           CSV Upload
         </CardTitle>
         <CardDescription className="font-poppins">
-          Upload a CSV file with 'profile_url' and 'name' columns for LinkedIn contacts. You can include up to 3 additional custom columns.
+          Upload a CSV file with LinkedIn contacts. Required columns: profile_url, first_name, last_name. Optional: company, position, message.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 font-poppins">
@@ -192,23 +235,65 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
           </div>
         )}
 
+        {showMapping && csvHeaders.length > 0 && (
+          <Card className="p-4 border-2 border-primary/20">
+            <div className="font-medium mb-4 flex items-center gap-2">
+              <ArrowRight className="w-4 h-4" />
+              Map CSV Columns to Required Fields
+            </div>
+            <div className="space-y-3">
+              {[...requiredColumns, ...optionalColumns].map((expectedCol) => (
+                <div key={expectedCol} className="flex items-center gap-3">
+                  <div className="w-32 text-sm font-medium">
+                    {expectedCol}
+                    {requiredColumns.includes(expectedCol) && (
+                      <span className="text-red-500 ml-1">*</span>
+                    )}
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <Select
+                    value={
+                      Object.entries(columnMapping).find(([_, mapped]) => mapped === expectedCol)?.[0] || ""
+                    }
+                    onValueChange={(value) => {
+                      // Remove any existing mapping to this expected column
+                      const newMapping = { ...columnMapping };
+                      Object.keys(newMapping).forEach(key => {
+                        if (newMapping[key] === expectedCol) {
+                          newMapping[key] = null;
+                        }
+                      });
+                      // Set new mapping
+                      if (value) {
+                        newMapping[value] = expectedCol;
+                      }
+                      setColumnMapping(newMapping);
+                    }}
+                  >
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Select CSV column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No mapping</SelectItem>
+                      {csvHeaders.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
         <Button 
           onClick={processFile} 
-          disabled={!file || isProcessing}
+          disabled={!file || isProcessing || !showMapping}
         >
           {isProcessing ? 'Processing...' : 'Process CSV'}
         </Button>
-
-        {customColumns.length > 0 && (
-          <div className="p-4 border rounded-lg bg-muted/50">
-            <div className="font-medium mb-2">Custom Columns Detected:</div>
-            <div className="flex flex-wrap gap-2">
-              {customColumns.map((col, index) => (
-                <Badge key={index} variant="outline">{col}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
 
         {validationStatus && (
           <div className="p-4 border rounded-lg space-y-2">

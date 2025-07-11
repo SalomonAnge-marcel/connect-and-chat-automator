@@ -9,7 +9,8 @@ import { Linkedin, Upload, BarChart3, BookOpen, Users } from 'lucide-react';
 
 interface CSVData {
   profile_url: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   company?: string;
   position?: string;
   message?: string;
