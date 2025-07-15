@@ -36,6 +36,19 @@ export const CampaignWizard: React.FC<CampaignWizardProps> = ({ onBack, onComple
     stopOnBlock: true,
     campaignName: 'New Campaign'
   });
+  const [customFields, setCustomFields] = useState<string[]>([]);
+  const [newCustomField, setNewCustomField] = useState("");
+
+  const addCustomField = () => {
+    const field = newCustomField.trim();
+    if (field && !customFields.includes(field)) {
+      setCustomFields([...customFields, field]);
+      setNewCustomField("");
+    }
+  };
+  const removeCustomField = (field: string) => {
+    setCustomFields(customFields.filter(f => f !== field));
+  };
 
   const steps = [
     { title: 'Import Leads', description: 'Upload your LinkedIn leads' },
@@ -117,7 +130,7 @@ export const CampaignWizard: React.FC<CampaignWizardProps> = ({ onBack, onComple
   const progress = (currentStep / 4) * 100;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 font-poppins">
+    <div className="max-w-4xl mx-auto space-y-6 font-poppins px-[10rem] py-[5rem]">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={handlePrevious}>
@@ -147,6 +160,39 @@ export const CampaignWizard: React.FC<CampaignWizardProps> = ({ onBack, onComple
         <Progress value={progress} className="h-2" />
       </div>
 
+      {/* Custom Fields Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-space-grotesk">Custom Fields for Personalization</CardTitle>
+          <p className="text-muted-foreground">Add any custom fields you want to use in your messages. Use <span className='bg-muted px-1 rounded font-mono'>{'{{custom_field}}'}</span> in your message templates.</p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              value={newCustomField}
+              onChange={e => setNewCustomField(e.target.value)}
+              placeholder="Enter custom field name (e.g. city, interest)"
+              className="border rounded px-3 py-2 font-poppins text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <Button type="button" onClick={addCustomField} disabled={!newCustomField.trim()}>
+              Add
+            </Button>
+          </div>
+          {customFields.length > 0 && (
+            <ul className="space-y-2">
+              {customFields.map(field => (
+                <li key={field} className="flex items-center gap-2">
+                  <span className="bg-muted px-2 py-1 rounded text-sm font-mono">{'{{' + field + '}}'}</span>
+                  <Button type="button" variant="destructive" size="sm" onClick={() => removeCustomField(field)}>
+                    Remove
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
       {/* Current Step Content */}
       <Card>
         <CardHeader>

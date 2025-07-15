@@ -26,6 +26,8 @@ interface Step1Props {
 export const Step1ImportLeads: React.FC<Step1Props> = ({ data, onUpdate }) => {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Store headers for dynamic preview
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
 
   const handleFileUpload = (file: File) => {
     if (!file.name.endsWith('.csv')) {
@@ -38,7 +40,8 @@ export const Step1ImportLeads: React.FC<Step1Props> = ({ data, onUpdate }) => {
       try {
         const csv = e.target?.result as string;
         const lines = csv.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const headers = lines[0].split(',').map(h => h.trim());
+        setCsvHeaders(headers);
 
         // Check required columns
         if (!headers.includes('profile_url') || !headers.includes('name')) {
@@ -151,19 +154,17 @@ export const Step1ImportLeads: React.FC<Step1Props> = ({ data, onUpdate }) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Profile URL</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Position</TableHead>
+                  {csvHeaders.map(header => (
+                    <TableHead key={header}>{header}</TableHead>
+                  ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.leads.slice(0, 5).map((lead: Lead, index: number) => (
+                {data.leads.slice(0, 5).map((lead: any, index: number) => (
                   <TableRow key={index}>
-                    <TableCell>{lead.name}</TableCell>
-                    <TableCell className="max-w-xs truncate">{lead.profile_url}</TableCell>
-                    <TableCell>{lead.company || '-'}</TableCell>
-                    <TableCell>{lead.position || '-'}</TableCell>
+                    {csvHeaders.map(header => (
+                      <TableCell key={header}>{lead[header] || '-'}</TableCell>
+                    ))}
                   </TableRow>
                 ))}
               </TableBody>
@@ -177,7 +178,8 @@ export const Step1ImportLeads: React.FC<Step1Props> = ({ data, onUpdate }) => {
         <h4 className="font-semibold mb-2">Required CSV Columns:</h4>
         <ul className="text-sm space-y-1 text-muted-foreground">
           <li><strong>profile_url:</strong> Full LinkedIn profile URL (required)</li>
-          <li><strong>name:</strong> Contact's full name (required)</li>
+          <li><strong>first_name:</strong> Contact's first name (required)</li>
+          <li><strong>last_name:</strong> Contact's last name (required)</li>
           <li><strong>company:</strong> Company name (optional)</li>
           <li><strong>position:</strong> Job title (optional)</li>
         </ul>

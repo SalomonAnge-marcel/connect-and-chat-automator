@@ -54,7 +54,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 px-[10rem] py-[5rem]">
       <div className="container mx-auto px-4 py-8">
         <Dashboard onCreateCampaign={handleCreateCampaign} />
       </div>

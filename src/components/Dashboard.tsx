@@ -11,6 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Campaign {
   name: string;
@@ -46,6 +49,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onCreateCampaign }) => {
       status: "running",
       createdAt: "2024-01-20"
     }
+  ];
+  const navigate = useNavigate();
+  const [showAccounts, setShowAccounts] = useState(false);
+  const accounts = [
+    { name: "john.doe@gmail.com", status: "connected" },
+    { name: "jane.smith@gmail.com", status: "disconnected" },
+    { name: "alex.lee@gmail.com", status: "connected" },
   ];
 
   const getStatusBadge = (status: Campaign['status']) => {
@@ -140,7 +150,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onCreateCampaign }) => {
             </TableHeader>
             <TableBody>
               {campaigns.map((campaign, index) => (
-                <TableRow key={index}>
+                <TableRow key={index} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(`/campaign/${encodeURIComponent(campaign.name)}`)}>
                   <TableCell className="font-medium">{campaign.name}</TableCell>
                   <TableCell>{campaign.sent}</TableCell>
                   <TableCell>{campaign.connected}</TableCell>
@@ -161,9 +171,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onCreateCampaign }) => {
           <CardTitle>Account Info</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div
+            className="flex items-center justify-between cursor-pointer hover:underline"
+            onClick={() => setShowAccounts(true)}
+            title="View connected LinkedIn accounts"
+          >
             <span className="text-sm">LinkedIn Accounts Connected</span>
-            <Badge variant="outline">1 / 3</Badge>
+            <Badge variant="outline">{accounts.filter(a => a.status === "connected").length} / {accounts.length}</Badge>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm">Credits Remaining</span>
@@ -171,6 +185,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onCreateCampaign }) => {
           </div>
         </CardContent>
       </Card>
+      {/* Modal for LinkedIn Accounts */}
+      <Dialog open={showAccounts} onOpenChange={setShowAccounts}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-space-grotesk">LinkedIn Accounts</DialogTitle>
+          </DialogHeader>
+          <ul className="space-y-2 font-poppins">
+            {accounts.map((acc) => (
+              <li key={acc.name} className="flex justify-between items-center">
+                <span>{acc.name}</span>
+                <span
+                  className={
+                    acc.status === "connected"
+                      ? "text-green-600 font-medium"
+                      : "text-gray-400 font-medium"
+                  }
+                >
+                  {acc.status.charAt(0).toUpperCase() + acc.status.slice(1)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

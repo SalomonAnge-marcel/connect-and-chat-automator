@@ -17,10 +17,15 @@ export const Step2ConnectionMessage: React.FC<Step2Props> = ({ data, onUpdate })
   };
 
   const getPreviewMessage = () => {
-    return data.connectionMessage
-      .replace(/\{\{name\}\}/g, sampleLead.name || 'John Doe')
-      .replace(/\{\{company\}\}/g, sampleLead.company || 'Tech Corp')  
-      .replace(/\{\{position\}\}/g, sampleLead.position || 'Software Engineer');
+    let msg = data.connectionMessage;
+    // Always replace first_name and last_name
+    msg = msg.replace(/\{\{first_name\}\}/g, sampleLead.first_name || 'First');
+    msg = msg.replace(/\{\{last_name\}\}/g, sampleLead.last_name || 'Last');
+    // Replace all other variables dynamically
+    Object.keys(sampleLead).forEach(key => {
+      msg = msg.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), sampleLead[key] || '');
+    });
+    return msg;
   };
 
   return (
@@ -66,9 +71,12 @@ export const Step2ConnectionMessage: React.FC<Step2Props> = ({ data, onUpdate })
       <div className="bg-muted/50 p-4 rounded-lg">
         <h4 className="font-semibold mb-2">Available Variables:</h4>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><code className="bg-background px-2 py-1 rounded">{'{{name}}'}</code> - Contact's name</div>
-          <div><code className="bg-background px-2 py-1 rounded">{'{{company}}'}</code> - Company name</div>
-          <div><code className="bg-background px-2 py-1 rounded">{'{{position}}'}</code> - Job title</div>
+          {['first_name', 'last_name', ...Object.keys(sampleLead || {}).filter(key => key !== 'first_name' && key !== 'last_name')].map((key) => (
+            <div key={key}>
+              <code className="bg-background px-2 py-1 rounded">{'{{' + key + '}}'}</code>
+              <span className="ml-2">- {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+            </div>
+          ))}
         </div>
       </div>
 
