@@ -13,7 +13,7 @@ const DAILY_LIMIT = 30; // Maximum connection requests per day
 let isRunning = false; // Track if automation is currently running
 let currentStatus = 'Ready'; // Current status message
 
-// Listen for messages from popup
+// Listen for messages from popup or other parts of the extension
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'startAutomation') {
         startAutomationProcess(request.csvData)
@@ -25,7 +25,69 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'getStatus') {
         sendResponse({status: currentStatus});
     }
+
+    // Handle session check request
+    if (request.action === 'checkSession') {
+        // This checks if the user is logged into LinkedIn by looking for a special cookie called 'li_at'.
+        // If the cookie exists, it means the user is logged in.
+        chrome.cookies.get({ url: 'https://www.linkedin.com', name: 'li_at' }, function(cookie) {
+            // If the cookie is found, session is valid (user is logged in)
+            const sessionValid = !!cookie;
+            // Send the result back to whoever asked
+            sendResponse({ success: true, sessionValid });
+        });
+        // Return true to tell Chrome we will send a response asynchronously
+        return true;
+    }
+
+    // Listen for badge update requests from popup
+    if (request.action === 'setBadge') {
+        // This lets the popup ask the background script to show a badge (like a green or red dot) on the extension icon.
+        chrome.action.setBadgeText({ text: request.text });
+        chrome.action.setBadgeBackgroundColor({ color: request.color });
+        sendResponse({ success: true });
+    }
 });
+
+// When Chrome starts, check if the user is logged into LinkedIn
+chrome.runtime.onStartup.addListener(() => {
+  checkLinkedInSessionAndReport();
+});
+
+// This function opens LinkedIn in a hidden tab, checks if the user is logged in, and reports the result
+function checkLinkedInSessionAndReport() {
+  // Open LinkedIn in a new background tab (user doesn't see this)
+  chrome.tabs.create({ url: 'https://www.linkedin.com/feed', active: false }, (tab) => {
+    // Wait a few seconds for the page to load
+    setTimeout(() => {
+      // Run code inside the LinkedIn page to check the URL
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+          // If the page URL contains '/feed', the user is logged in
+          if (window.location.href.includes('/feed')) {
+            return 'connected';
+          } else {
+            return 'not_connected';
+          }
+        },
+      }, (results) => {
+        const status = results && results[0] && results[0].result ? results[0].result : 'not_connected';
+        // Send the result to your backend server
+        fetch('https://yourapp.com/api/linkedin-session-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_status: status,
+            timestamp: new Date().toISOString()
+          })
+        });
+        // Close the tab after checking
+        chrome.tabs.remove(tab.id);
+      });
+    }, 5000); // Wait 5 seconds for the page to load
+  });
+}
 
 // Main automation process
 async function startAutomationProcess(csvData) {

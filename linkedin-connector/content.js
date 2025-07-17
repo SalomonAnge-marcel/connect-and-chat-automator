@@ -205,3 +205,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
     }
 });
+
+// Listen for handshake from the web app
+window.addEventListener('message', function(event) {
+    if (event.source !== window) return;
+    if (event.data && event.data.type === 'EXTENSION_PING') {
+        window.postMessage({ type: 'EXTENSION_PONG' }, '*');
+    }
+});

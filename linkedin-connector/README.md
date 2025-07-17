@@ -111,3 +111,19 @@ This extension uses:
 - Content scripts for LinkedIn page interaction
 
 For developers: The code is commented for 7th-grade reading level while maintaining professional functionality.
+
+## New: Connect LinkedIn Button
+
+- The extension popup now includes a **Connect LinkedIn** button.
+- When clicked, it grabs your LinkedIn session cookie (`li_at`) and sends it securely to your backend at `http://localhost:3001/api/store-linkedin-cookie`.
+- You will see a notification and badge for success or failure.
+- Make sure your backend server is running and accessible at that address.
+
+---
+
+### For 7th Graders:
+
+- The new **Connect LinkedIn** button in the extension lets you safely send your LinkedIn login info (just a special cookie) to your own computer's server.
+- When you click it, it checks if you're logged in, grabs the cookie, and sends it to your backend.
+- You'll see a green badge and message if it works, or a red one if it doesn't.
+- This helps your app know you're logged in to LinkedIn, so it can start your campaign.

@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('csvFile').addEventListener('change', handleFileSelect);
     document.getElementById('startBtn').addEventListener('click', startAutomation);
     document.getElementById('stopBtn').addEventListener('click', stopAutomation);
+    document.getElementById('connectLinkedInBtn').addEventListener('click', connectLinkedInHandler);
     
     // Initialize UI
     initializePopup();
@@ -270,8 +271,69 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
 });
 
+// === Connect LinkedIn Button Logic ===
+// When you click the button, this grabs your LinkedIn session cookie and sends it to your backend.
+// It also sends which campaign and user you are working with.
+function connectLinkedInHandler() {
+    // For now, we'll use example campaign and user IDs
+    // In a real app, you would get these from your web app and pass them to the extension
+    const campaignId = "demo-campaign-123"; // TODO: Replace with real campaign ID from your app
+    const userId = "demo-user-456";         // TODO: Replace with real user ID from your app
+    // Disable button while processing
+    const btn = document.getElementById('connectLinkedInBtn');
+    btn.disabled = true;
+    btn.textContent = 'Connecting...';
+    chrome.cookies.get({ url: 'https://www.linkedin.com', name: 'li_at' }, function(cookie) {
+        if (!cookie) {
+            showPopupNotification('❌ li_at cookie not found. Please log into LinkedIn.', false);
+            btn.disabled = false;
+            btn.textContent = 'Connect LinkedIn';
+            setBadge('ERR', '#dc3545');
+            return;
+        }
+        // Send the cookie, campaignId, and userId to the backend
+        fetch('http://localhost:3001/api/store-linkedin-cookie', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                li_at: cookie.value,
+                campaignId,
+                userId,
+                timestamp: new Date().toISOString()
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            showPopupNotification('✅ LinkedIn session sent!', true);
+            btn.disabled = false;
+            btn.textContent = 'Connect LinkedIn';
+            setBadge('OK', '#28a745');
+        })
+        .catch(err => {
+            showPopupNotification('❌ Failed to send cookie.', false);
+            btn.disabled = false;
+            btn.textContent = 'Connect LinkedIn';
+            setBadge('ERR', '#dc3545');
+        });
+    });
+}
+
+function showPopupNotification(message, success) {
+    const statusDiv = document.getElementById('status');
+    statusDiv.textContent = message;
+    statusDiv.style.color = success ? '#28a745' : '#dc3545';
+    setTimeout(() => {
+        statusDiv.textContent = 'Ready to start. Please upload a CSV file with \'profile_url\' and \'name\' columns.';
+        statusDiv.style.color = '';
+    }, 4000);
+}
+
 // Add error handling for chrome extension context
 window.addEventListener('error', function(event) {
     console.error('LinkedIn Connector Popup Error:', event.error);
     updateStatus('Popup error: ' + event.error.message, 'error');
 });
+
+function setBadge(text, color) {
+    chrome.runtime.sendMessage({ action: 'setBadge', text, color });
+}
