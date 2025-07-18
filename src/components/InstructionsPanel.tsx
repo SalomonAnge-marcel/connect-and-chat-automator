@@ -15,28 +15,22 @@ import {
 export const InstructionsPanel: React.FC = () => {
   const downloadExtensionFiles = async () => {
     try {
-      // Create a zip-like structure with all extension files
+      // Only include the new extension files
       const files = {
         'manifest.json': await fetch('/linkedin-connector/manifest.json').then(r => r.text()),
-        'background.js': await fetch('/linkedin-connector/background.js').then(r => r.text()),
-        'content.js': await fetch('/linkedin-connector/content.js').then(r => r.text()),
         'popup.html': await fetch('/linkedin-connector/popup.html').then(r => r.text()),
         'popup.js': await fetch('/linkedin-connector/popup.js').then(r => r.text()),
-        'papaparse.min.js': await fetch('/linkedin-connector/papaparse.min.js').then(r => r.text()),
+        'service_worker.js': await fetch('/linkedin-connector/service_worker.js').then(r => r.text()),
       };
-
-      // Create a simple archive by combining all files with separators
       let archiveContent = '';
       for (const [filename, content] of Object.entries(files)) {
         archiveContent += `// ===== ${filename} =====\n${content}\n\n`;
       }
-
-      // Create download
       const blob = new Blob([archiveContent], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'linkedin-connector-extension.txt';
+      a.download = 'linkedin-cookie-connector-extension.txt';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

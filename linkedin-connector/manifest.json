@@ -1,37 +1,22 @@
 {
-  "name": "LinkedIn Connector",
-  "version": "2.0",
+  "name": "LinkedIn Cookie Connector",
+  "version": "1.0.0",
+  "description": "A Chrome extension that securely retrieves the user's LinkedIn session cookie (li_at) and sends it to a Supabase backend when the user clicks 'Connect LinkedIn'.",
   "manifest_version": 3,
-  "description": "Safely automates LinkedIn outreach using your existing session with built-in safety measures",
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "LinkedIn Connector"
-  },
   "permissions": [
-    "activeTab",
-    "storage",
-    "tabs",
     "cookies",
-    "scripting"
+    "tabs",
+    "scripting",
+    "storage"
   ],
   "host_permissions": [
-    "https://www.linkedin.com/*",
-    "http://localhost:3001/*"
+    "https://www.linkedin.com/",
+    "https://YOUR-SUPABASE-API-ENDPOINT.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "service_worker.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["https://www.linkedin.com/*"],
-      "js": ["content.js"],
-      "run_at": "document_end"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["popup.html"],
-      "matches": ["https://www.linkedin.com/*"]
-    }
-  ]
+  "action": {
+    "default_popup": "popup.html"
+  }
 }
