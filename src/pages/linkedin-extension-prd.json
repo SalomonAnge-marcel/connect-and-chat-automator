@@ -1,67 +1,25 @@
-{
-    "name": "LinkedIn Cookie Connector",
-    "version": "1.0.0",
-    "description": "A Chrome extension that securely retrieves the user's LinkedIn session cookie (li_at) and sends it to a Supabase backend when the user clicks 'Connect LinkedIn'.",
-    "manifest_version": 3,
-    "core_functionality": "Extract LinkedIn 'li_at' cookie and report it to Supabase securely",
-    "architecture": {
-      "popup.html": {
-        "purpose": "User interface with a single button to initiate the cookie fetch",
-        "components": ["'Connect LinkedIn' button", "Status area (e.g., success or error message)"]
-      },
-      "popup.js": {
-        "purpose": "Handles click event from popup.html and communicates with background service worker"
-      },
-      "service_worker.js": {
-        "purpose": "Uses chrome.cookies API to retrieve the 'li_at' cookie and sends it via fetch to Supabase endpoint"
-      },
-      "manifest.json": {
-        "permissions": [
-          "cookies",
-          "tabs",
-          "scripting",
-          "storage"
-        ],
-        "host_permissions": [
-          "https://www.linkedin.com/",
-          "https://YOUR-SUPABASE-API-ENDPOINT.com/*"
-        ],
-        "background": {
-          "service_worker": "service_worker.js"
-        },
-        "action": {
-          "default_popup": "popup.html"
-        }
-      }
-    },
-    "backend_integration": {
-      "api_url": "https://YOUR-SUPABASE-API-ENDPOINT.com/api/store-liat",
-      "method": "POST",
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "body": {
-        "li_at": "<cookie_value>",
-        "timestamp": "<ISO_timestamp>"
-      },
-      "expected_success_response": {
-        "status": "success",
-        "message": "Cookie stored successfully"
-      }
-    },
-    "ui_behavior": {
-      "on_click_connect": "Trigger service worker to retrieve 'li_at' cookie and send to Supabase",
-      "on_success": "Display ✅ Cookie sent successfully",
-      "on_error": "Display ❌ Could not send cookie"
-    },
-    "security_notes": {
-      "do_not_expose_cookie": "li_at should never be logged in the console or shown to user",
-      "network": "Only send over HTTPS",
-      "storage": "Do not store locally in chrome.storage or localStorage"
-    },
-    "future_extensions": [
-      "Add OAuth flow or session validation",
-      "Show last synced time in popup UI",
-      "Support optional encrypted storage in Supabase"
-    ]
-  }  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkedIn Cookie Connector</title>
+  <!-- Import Poppins font from Google Fonts for consistency -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body, * {
+      font-family: 'Poppins', Arial, sans-serif !important;
+    }
+  </style>
+</head>
+<body class="bg-white min-w-[320px] min-h-[180px] flex flex-col items-center justify-center p-4">
+  <div class="w-full max-w-xs rounded-lg border bg-white shadow-md p-4 flex flex-col items-center">
+    <h1 class="text-xl font-bold mb-2 text-center">LinkedIn Cookie Connector</h1>
+    <p class="text-sm text-gray-500 mb-4 text-center">Safely connect your LinkedIn session to your backend</p>
+    <button id="connectBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mb-3 transition-colors">Connect LinkedIn</button>
+    <div id="status" class="text-center text-sm text-gray-700 min-h-[24px]">&nbsp;</div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>  
