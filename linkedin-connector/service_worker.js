@@ -4,8 +4,8 @@
 // For 7th graders: This is like the engine under the hood!
 
 // Replace with your real Supabase endpoint and API key
-const SUPABASE_API_URL = 'https://YOUR-SUPABASE-API-ENDPOINT.com/api/store-liat';
-const SUPABASE_API_KEY = 'YOUR_SUPABASE_API_KEY'; // If required
+const SUPABASE_API_URL = 'https://vycheykmhswtxjzmfaiy.supabase.co/api/store-liat';
+const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5Y2hleWttaHN3dHhqem1mYWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5MjU3MTAsImV4cCI6MjA2ODUwMTcxMH0.YpBcGrGs4CmnOXiDe131IvT9NPgssdHWNerLyLiMnX0'; // If required
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'connect_linkedin') {
